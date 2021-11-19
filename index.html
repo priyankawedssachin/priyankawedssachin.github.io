@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="msapplication-TileImage" content="/images/card_1.jpg">
+    <meta property="og:site_name" content="Wedding Invitation">
+    <meta property="og:title" content="Priyanka weds Sachin">
+    <meta property="og:description" content="Save the date December 1, 2021">
+    <meta property="og:image" content="/images/card_1.jpg">
+    <meta property="og:type" content="website" />
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="300">
+    <meta property="og:image:height" content="300">
+    <meta id="metaUrl" property="og:url" content="">
+
+    <title>Wedding_Invitation(Priyanka weds Sachin)</title>
+</head>
+
+<body>
+    <div id="card">
+        <style>
+            .card {
+                display: block;
+                max-width: 100vw;
+                object-fit: contain;
+                height: 100vh;
+                margin: 20px auto;
+
+                border-width: 1px;
+                border-style: solid;
+                border-image: linear-gradient(to right, red, darkorchid) 1;
+
+                box-shadow: 2px 1px 54px 17px rgba(201, 154, 154, 0.76);
+                -webkit-box-shadow: 2px 1px 54px 17px rgba(201, 154, 154, 0.76);
+                -moz-box-shadow: 2px 1px 54px 17px rgba(201, 154, 154, 0.76);
+            }
+
+            #name {
+                left: 47vw;
+                position: absolute;
+                top: 56vh;
+                font-size: 20px;
+                color: rgb(22, 87, 139);
+            }
+
+            #desc {
+                left: 47vw;
+                position: absolute;
+                top: 62vh;
+                font-size: 20px;
+                color: rgb(22, 87, 139);
+            }
+        </style>
+        <img class="card" data-img-no="1" src="/images/card_1.jpg">
+        <img class="card" data-img-no="2" src="/images/card_2.jpg">
+        <img class="card" data-img-no="3" src="/images/card_3.jpg">
+        <img class="card" data-img-no="4" src="/images/card_4.jpg">
+        <img class="card" data-img-no="5" src="/images/card_5.jpg">
+        <p id="name"></p>
+        <p id="desc"></p>
+    </div>
+    <script src="/js/jspdf.min.js"></script>
+    <script type="text/javascript">
+        var images = [];
+        var getImageNoAttr = img => parseInt(img.getAttribute("data-img-no"));
+        var params = (function () {
+            var params = {};
+            (window.location.search || "?n=&d=")
+                .substr(1)
+                .split("&")
+                .forEach(param => {
+                    var parts = param.split("=");
+                    params[parts[0]] = decodeURIComponent(parts[1]);
+                });
+            return params;
+        })();
+
+        document.querySelector("#metaUrl").setAttribute("content", window.location.href);
+
+        var name = params.n || '';
+        var desc = params.d || '';
+
+        document.querySelector("#name").innerHTML = name;
+        document.querySelector("#desc").innerHTML = desc;
+        var preparePDF = images => {
+            var doc = new jsPDF();
+            var isFirstPage = true;
+            images.sort((a, b) => getImageNoAttr(a) > getImageNoAttr(b))
+                .forEach(img => {
+                    if (!isFirstPage) doc.addPage();
+                    doc.addImage(img, 0, 0);
+                    if (isFirstPage) {
+                        doc.setFontSize(18);
+                        doc.setTextColor(22, 87, 139);
+                        doc.text(80, 123, name);
+                        doc.text(80, 136, desc);
+                        isFirstPage = false;
+                    }
+                });
+            doc.save("Wedding_Invitation(Priyanka weds Sachin).pdf");
+        };
+
+        var imageLoaded = function () {
+            images.push(this);
+            if (images.length == 5) preparePDF(images);
+        };
+
+        document.querySelectorAll('.card')
+            .forEach(img => {
+                var tmpImg = new Image();
+                tmpImg.onload = imageLoaded;
+                tmpImg.src = img.src
+            });
+    </script>
+</body>
+
+</html>
