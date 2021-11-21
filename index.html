@@ -53,7 +53,24 @@
                 font-size: 20px;
                 color: rgb(22, 87, 139);
             }
+
+            .controls-hidden {
+                display: none;
+                font-size: 20px;
+                margin: 10px auto;
+            }
+
+            .controls-visible {
+                display: block;
+            }
         </style>
+        <input type="text" class="controls-hidden" id="name-input" placeholder="Name">
+        <input type="text" class="controls-hidden" id="desc-input" placeholder="(with family)">
+        <div id="content" class="controls-hidden" style="width: 400px;">
+            <span id="link"></span>
+            <a id="sharableLink" href=""><img style="width: 30px;" src="https://i0.wp.com/image.similarpng.com/very-thumbnail/2020/07/Whatsapp-logo-on-transparent-background-PNG-(3).png" alt="Share"></a>
+        </div>
+
         <img class="card" data-img-no="1" src="/card_1.jpg">
         <img class="card" data-img-no="2" src="/card_2.jpg">
         <img class="card" data-img-no="3" src="/card_3.jpg">
@@ -80,38 +97,95 @@
 
         var name = params.n || '';
         var desc = params.d || '';
+        var edit = params.e || '';
+        var nameText = document.querySelector("#name");
+        var descText = document.querySelector("#desc");
 
-        document.querySelector("#name").innerHTML = name;
-        document.querySelector("#desc").innerHTML = desc;
-        var preparePDF = images => {
-            var doc = new jsPDF();
-            var isFirstPage = true;
-            images.sort((a, b) => getImageNoAttr(a) > getImageNoAttr(b))
-                .forEach(img => {
-                    if (!isFirstPage) doc.addPage();
-                    doc.addImage(img, 0, 0);
-                    if (isFirstPage) {
-                        doc.setFontSize(18);
-                        doc.setTextColor(22, 87, 139);
-                        doc.text(80, 123, name);
-                        doc.text(80, 136, desc);
-                        isFirstPage = false;
-                    }
-                });
-            doc.save("Wedding_Invitation(Priyanka weds Sachin).pdf");
-        };
+        if (name == '' && edit != '') {
+            var nameInput = document.querySelector('#name-input');
+            var descInput = document.querySelector('#desc-input');
+            var contentBox = document.querySelector("#content");
+            var link = document.querySelector("#link");
+            var sharableLink = document.querySelector("#sharableLink");
 
-        var imageLoaded = function () {
-            images.push(this);
-            if (images.length == 5) preparePDF(images);
-        };
+            nameInput.classList.add('controls-visible');
+            descInput.classList.add('controls-visible');
+            contentBox.classList.add('controls-visible');
 
-        document.querySelectorAll('.card')
-            .forEach(img => {
-                var tmpImg = new Image();
-                tmpImg.onload = imageLoaded;
-                tmpImg.src = img.src
+            var updateUrl = () => {
+                var url = window.location.href.split('?')[0];
+                var finalUrl = `${url}?n=${encodeURI(nameInput.value)}&d=${encodeURI(descInput.value)}`;
+                link.innerHTML = finalUrl;
+                sharableLink.setAttribute("href", `whatsapp://send?text=${encodeURI(finalUrl)}`);
+            };
+
+            nameInput.addEventListener('keyup', function () {
+                nameText.innerHTML = this.value;
+                updateUrl();
             });
+            descInput.addEventListener('keyup', function () {
+                descText.innerHTML = this.value;
+                updateUrl();
+            });
+            link.addEventListener("click", selectText);
+            updateUrl();
+        } else {
+
+            nameText.innerHTML = name;
+            descText.innerHTML = desc;
+            var preparePDF = images => {
+                var doc = new jsPDF();
+                var isFirstPage = true;
+                images.sort((a, b) => getImageNoAttr(a) > getImageNoAttr(b))
+                    .forEach(img => {
+                        if (!isFirstPage) doc.addPage();
+                        doc.addImage(img, 0, 0);
+                        if (isFirstPage) {
+                            doc.setFontSize(18);
+                            doc.setTextColor(22, 87, 139);
+                            doc.text(80, 123, name);
+                            doc.text(80, 136, desc);
+                            isFirstPage = false;
+                        }
+                    });
+                doc.save("Wedding_Invitation(Priyanka weds Sachin).pdf");
+            };
+
+            var imageLoaded = function () {
+                images.push(this);
+                if (images.length == 5) preparePDF(images);
+            };
+
+            document.querySelectorAll('.card')
+                .forEach(img => {
+                    var tmpImg = new Image();
+                    tmpImg.onload = imageLoaded;
+                    tmpImg.src = img.src
+                });
+        }
+
+        function selectText() {
+            var sel, range;
+            var el = link;
+            if (window.getSelection && document.createRange) { //Browser compatibility
+                sel = window.getSelection();
+                if (sel.toString() == '') { //no text selection
+                    window.setTimeout(function () {
+                        range = document.createRange(); //range object
+                        range.selectNodeContents(el); //sets Range
+                        sel.removeAllRanges(); //remove all ranges from selection
+                        sel.addRange(range);//add Range to a Selection.
+                    }, 1);
+                }
+            } else if (document.selection) { //older ie
+                sel = document.selection.createRange();
+                if (sel.text == '') { //no text selection
+                    range = document.body.createTextRange();//Creates TextRange object
+                    range.moveToElementText(el);//sets Range
+                    range.select(); //make selection.
+                }
+            }
+        }
     </script>
 </body>
 
