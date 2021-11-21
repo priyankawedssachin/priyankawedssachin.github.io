@@ -117,7 +117,7 @@
                 var finalUrl = `${url}?n=${encodeURI(nameInput.value)}&d=${encodeURI(descInput.value)}`;
                 link.innerHTML = finalUrl;
                 var a = `${url}?n=${nameInput.value}&d=${descInput.value}`;
-                sharableLink.setAttribute("href", `whatsapp://send?text=${encodeURI(a)}`);
+                sharableLink.setAttribute("href", `whatsapp://send?text=${encodeURI(finalUrl)}`);
             };
 
             nameInput.addEventListener('keyup', function () {
